@@ -50,6 +50,7 @@ namespace CapaPresentacion
             {
                 case 1: Mandato1(); break;
                 case 2: Mandato2(); break;
+                case 3: Mandato3(); break;
                 default: Console.WriteLine("Mandato pendiente o no valido."); break;
             }
         }
@@ -102,6 +103,37 @@ namespace CapaPresentacion
             alerta.CambiarCanal(new CanalWhatsApp());
             Console.WriteLine($"-> La misma alerta, ahora conectada al canal {alerta.NombreCanal} (cambio en ejecucion):");
             alerta.Notificar();
+        }
+
+        // MANDATO 3 - Cada tipo de mensaje arma su texto; el canal no lo sabe
+        private static void Mandato3()
+        {
+            Encabezado(3, "La alerta agrega [URGENTE] y la promocion agrega el texto legal, sin que el canal lo sepa");
+
+            const string textoAlerta = "Se bloqueo su tarjeta terminada en 4417 por 3 intentos fallidos.";
+            const string textoPromo = "Cero comision en remesas recibidas hasta el 30/11.";
+
+            ICanal[] canales = { new CanalCorreo(), new CanalSms(), new CanalWhatsApp() };
+
+            Console.WriteLine($"Contenido base de la alerta:    \"{textoAlerta}\"");
+            Console.WriteLine($"Contenido base de la promocion: \"{textoPromo}\"\n");
+
+            Console.WriteLine("--- AlertaSeguridad por los 3 canales (el prefijo lo pone el MENSAJE) ---\n");
+            foreach (ICanal canal in canales)
+            {
+                new AlertaSeguridad(canal, "Frankeny Castillo", textoAlerta).Notificar();
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("--- Promocion por los 3 canales (el texto legal lo pone el MENSAJE) ---\n");
+            foreach (ICanal canal in canales)
+            {
+                new Promocion(canal, "Frankeny Castillo", textoPromo).Notificar();
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("Conclusion: ICanal.Enviar(destinatario, texto) solo recibe texto ya armado.");
+            Console.WriteLine("Ningun canal contiene la palabra [URGENTE] ni el texto legal en su codigo.");
         }
 
         private static void Encabezado(int numero, string titulo)

@@ -4,10 +4,13 @@ namespace CapaNegocio
 {
     /// <summary>
     /// Abstraccion refinada: alerta de seguridad.
-    /// Hereda de Mensaje y delega el envio en el canal que recibio.
+    /// MANDATO 3: agrega el prefijo [URGENTE] antes de enviar.
+    /// El canal recibe el texto ya armado y no sabe que es una alerta.
     /// </summary>
     public class AlertaSeguridad : Mensaje
     {
+        private const string Prefijo = "[URGENTE] ";
+
         public AlertaSeguridad(ICanal canal, string destinatario, string contenido)
             : base(canal, destinatario, contenido)
         {
@@ -15,7 +18,8 @@ namespace CapaNegocio
 
         public override void Notificar()
         {
-            Canal.Enviar(Destinatario, Contenido);
+            string texto = Prefijo + Contenido;
+            Canal.Enviar(Destinatario, texto);
         }
     }
 }

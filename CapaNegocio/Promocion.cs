@@ -4,10 +4,14 @@ namespace CapaNegocio
 {
     /// <summary>
     /// Abstraccion refinada: promocion comercial.
-    /// Hereda de Mensaje y delega el envio en el canal que recibio.
+    /// MANDATO 3: agrega el texto legal al final antes de enviar.
+    /// El canal recibe el texto ya armado y no sabe que es una promocion.
     /// </summary>
     public class Promocion : Mensaje
     {
+        private const string TextoLegal =
+            " | Aplican terminos y condiciones. Sujeto a aprobacion crediticia.";
+
         public Promocion(ICanal canal, string destinatario, string contenido)
             : base(canal, destinatario, contenido)
         {
@@ -15,7 +19,8 @@ namespace CapaNegocio
 
         public override void Notificar()
         {
-            Canal.Enviar(Destinatario, Contenido);
+            string texto = Contenido + TextoLegal;
+            Canal.Enviar(Destinatario, texto);
         }
     }
 }
