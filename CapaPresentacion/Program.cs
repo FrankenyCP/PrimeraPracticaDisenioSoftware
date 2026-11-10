@@ -3,6 +3,7 @@
 // CAPA DE PRESENTACION: menu de consola que demuestra cada mandato.
 
 using CapaDatos;
+using CapaNegocio;
 
 namespace CapaPresentacion
 {
@@ -48,6 +49,7 @@ namespace CapaPresentacion
             switch (numero)
             {
                 case 1: Mandato1(); break;
+                case 2: Mandato2(); break;
                 default: Console.WriteLine("Mandato pendiente o no valido."); break;
             }
         }
@@ -74,6 +76,32 @@ namespace CapaPresentacion
             sms.Enviar("809-555-0147",
                 "Este es un texto muy largo para comprobar que el canal SMS recorta el contenido " +
                 "cuando supera el limite de caracteres permitido por la red de telefonia movil del pais.");
+        }
+
+        // MANDATO 2 - Abstraccion: Mensaje recibe un ICanal y declara Notificar()
+        private static void Mandato2()
+        {
+            Encabezado(2, "Abstraccion: Mensaje(ICanal) declara Notificar(); subclases AlertaSeguridad y Promocion");
+
+            // El canal se inyecta por el constructor: aqui se construye el puente.
+            Mensaje alerta = new AlertaSeguridad(new CanalSms(), "809-555-0147",
+                "Se detecto un inicio de sesion desde un dispositivo nuevo.");
+
+            Mensaje promocion = new Promocion(new CanalCorreo(), "frankeny.castillo@correo.com",
+                "Tasa especial de 9.5% en prestamos de vehiculo este mes.");
+
+            Console.WriteLine($"-> AlertaSeguridad conectada al canal {alerta.NombreCanal}:");
+            alerta.Notificar();
+            Console.WriteLine();
+
+            Console.WriteLine($"-> Promocion conectada al canal {promocion.NombreCanal}:");
+            promocion.Notificar();
+            Console.WriteLine();
+
+            // Ventaja del puente: el canal se cambia en tiempo de ejecucion.
+            alerta.CambiarCanal(new CanalWhatsApp());
+            Console.WriteLine($"-> La misma alerta, ahora conectada al canal {alerta.NombreCanal} (cambio en ejecucion):");
+            alerta.Notificar();
         }
 
         private static void Encabezado(int numero, string titulo)
