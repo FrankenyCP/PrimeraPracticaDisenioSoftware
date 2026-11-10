@@ -51,6 +51,7 @@ namespace CapaPresentacion
                 case 1: Mandato1(); break;
                 case 2: Mandato2(); break;
                 case 3: Mandato3(); break;
+                case 4: Mandato4(); break;
                 default: Console.WriteLine("Mandato pendiente o no valido."); break;
             }
         }
@@ -66,7 +67,7 @@ namespace CapaPresentacion
             ICanal whatsApp = new CanalWhatsApp();
 
             Console.WriteLine("Cada canal recibe (destinatario, texto) y lo entrega a su manera:\n");
-            correo.Enviar("frankeny.castillo@correo.com", "Su estado de cuenta de octubre esta disponible.");
+            correo.Enviar("frankenycastillo@correo.com", "Su estado de cuenta de octubre esta disponible.");
             Console.WriteLine();
             sms.Enviar("809-555-0147", "Su estado de cuenta de octubre esta disponible.");
             Console.WriteLine();
@@ -134,6 +135,50 @@ namespace CapaPresentacion
 
             Console.WriteLine("Conclusion: ICanal.Enviar(destinatario, texto) solo recibe texto ya armado.");
             Console.WriteLine("Ningun canal contiene la palabra [URGENTE] ni el texto legal en su codigo.");
+        }
+
+        // MANDATO 4 - Extender ambas jerarquias sin tocar clases existentes
+        private static void Mandato4()
+        {
+            Encabezado(4, "Nuevo canal CanalPush y nuevos mensajes Recordatorio y Confirmacion: 4 x 4");
+
+            const string cliente = "Frankeny Castillo";
+
+            // Implementacion: 4 canales (CanalPush es nuevo).
+            ICanal[] canales = { new CanalCorreo(), new CanalSms(), new CanalWhatsApp(), new CanalPush() };
+
+            // Abstraccion: 4 tipos de mensaje (Recordatorio y Confirmacion son nuevos).
+            // Cada entrada sabe crear su mensaje sobre CUALQUIER canal que se le pase.
+            var fabricasDeMensajes = new List<(string Tipo, Func<ICanal, Mensaje> Crear)>
+            {
+                ("AlertaSeguridad", c => new AlertaSeguridad(c, cliente,
+                    "Retiro de RD$ 25,000 en cajero de Higuey. Si no fue usted, llame al banco.")),
+                ("Promocion", c => new Promocion(c, cliente,
+                    "Certificado financiero al 11% anual a 12 meses.")),
+                ("Recordatorio", c => new Recordatorio(c, cliente,
+                    "El pago minimo de su tarjeta es RD$ 3,450.", new DateTime(2026, 11, 25))),
+                ("Confirmacion", c => new Confirmacion(c, cliente,
+                    "Transferencia de RD$ 8,000 a la cuenta ***2290 realizada.", "TR-104582")),
+            };
+
+            int combinacion = 0;
+            foreach (var (tipo, crear) in fabricasDeMensajes)
+            {
+                foreach (ICanal canal in canales)
+                {
+                    combinacion++;
+                    Console.WriteLine($"#{combinacion,2}  {tipo} + {canal.GetType().Name}");
+                    crear(canal).Notificar();
+                    Console.WriteLine();
+                }
+            }
+
+            Console.WriteLine("-----------------------------------------------------------------");
+            Console.WriteLine($" Combinaciones demostradas: {combinacion} (4 mensajes x 4 canales)");
+            Console.WriteLine(" Clases concretas con Bridge: 4 mensajes + 4 canales = 8");
+            Console.WriteLine(" Con herencia harian falta:   4 tipos x 4 canales  = 16 clases combinadas");
+            Console.WriteLine(" Clases existentes modificadas: 0");
+            Console.WriteLine("   (solo se AGREGARON CanalPush.cs, Recordatorio.cs y Confirmacion.cs)");
         }
 
         private static void Encabezado(int numero, string titulo)
