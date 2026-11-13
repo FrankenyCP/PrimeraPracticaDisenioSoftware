@@ -1,40 +1,66 @@
-﻿using CapaDatos;
+// =============================================================================
+//  CapaNegocio · Mensaje.cs
+//  MANDATO 2 · Clase abstracta que recibe un ICanal y declara Notificar().
+// =============================================================================
+
+using CapaDatos;
 
 namespace CapaNegocio
 {
     /// <summary>
-    /// ABSTRACCION del patron Bridge: "que" se envia (el tipo de mensaje).
-    /// En lugar de heredar de un canal, guarda una referencia a ICanal:
-    /// esa referencia es el PUENTE entre las dos jerarquias (composicion).
+    /// ABSTRACCIÓN del patrón Bridge: representa "qué" se envía (el tipo de mensaje).
     /// </summary>
+    /// <remarks>
+    /// En lugar de heredar de un canal (lo que obligaría a crear AlertaSms, PromocionCorreo,
+    /// etc.), el mensaje GUARDA una referencia a <see cref="ICanal"/>. Esa referencia es el
+    /// PUENTE entre las dos jerarquías y se arma por composición, no por herencia.
+    /// Resultado: las clases crecen por suma (tipos + canales) y no por multiplicación.
+    /// </remarks>
     public abstract class Mensaje
     {
-        /// <summary>El puente: el canal concreto llega por el constructor.</summary>
+        /// <summary>
+        /// EL PUENTE: canal concreto por el que saldrá el mensaje.
+        /// Es <c>protected</c> para que solo las subclases lo usen, y su tipo es la
+        /// interfaz, así que puede ser cualquier canal (correo, SMS, WhatsApp, push...).
+        /// </summary>
         protected ICanal Canal { get; private set; }
 
-        /// <summary>A quien va dirigido el mensaje.</summary>
+        /// <summary>A quién va dirigido el mensaje.</summary>
         public string Destinatario { get; }
 
-        /// <summary>Contenido base del mensaje.</summary>
+        /// <summary>Contenido base del mensaje, antes de que cada tipo lo complete.</summary>
         public string Contenido { get; }
 
+        /// <summary>
+        /// Construye el mensaje recibiendo el canal desde afuera (inyección por constructor).
+        /// </summary>
+        /// <param name="canal">Implementación por la que se enviará. No puede ser null.</param>
+        /// <param name="destinatario">Quién recibe el mensaje.</param>
+        /// <param name="contenido">Texto base del mensaje.</param>
         protected Mensaje(ICanal canal, string destinatario, string contenido)
         {
+            // Se valida que exista un canal: sin él no hay puente.
             Canal = canal ?? throw new ArgumentNullException(nameof(canal));
             Destinatario = destinatario;
             Contenido = contenido;
         }
 
-        /// <summary>Cada tipo de mensaje decide como notificar usando su canal.</summary>
+        /// <summary>
+        /// Método abstracto: cada tipo de mensaje decide cómo arma su texto
+        /// y luego delega la entrega en su <see cref="Canal"/>.
+        /// </summary>
         public abstract void Notificar();
 
-        /// <summary>Permite cambiar el canal en tiempo de ejecucion.</summary>
+        /// <summary>
+        /// Cambia el canal en tiempo de ejecución. Ventaja del Bridge: el mismo mensaje
+        /// puede salir por otro canal sin crear ninguna clase nueva.
+        /// </summary>
         public void CambiarCanal(ICanal nuevoCanal)
         {
             Canal = nuevoCanal ?? throw new ArgumentNullException(nameof(nuevoCanal));
         }
 
-        /// <summary>Nombre del canal actual (para mostrarlo en consola).</summary>
+        /// <summary>Nombre del canal actual (solo para mostrarlo en consola).</summary>
         public string NombreCanal => Canal.Nombre;
     }
 }
